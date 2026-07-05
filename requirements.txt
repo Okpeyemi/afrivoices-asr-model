@@ -1,0 +1,26 @@
+# Dépendances épinglées — AfriVoices East Africa ASR
+# Testé sur Google Colab (Python 3.12). Versions compatibles entre elles.
+#
+# IMPORTANT (Colab) : installer kenlm + pyctcdecode PUIS redémarrer le runtime
+# avant tout import. Ne JAMAIS forcer la réinstallation de torch (build CUDA de
+# Colab) ni imposer numpy<2 (Colab utilise numpy 2.x) — cela casse l'environnement.
+
+transformers>=4.44,<5
+datasets>=3.5,<4
+accelerate>=0.33
+jiwer>=3.0
+evaluate>=0.4
+torchaudio
+soundfile
+librosa
+ffmpeg-python
+huggingface_hub
+
+# Décodage KenLM (installer en dernier, puis redémarrer le runtime)
+pyctcdecode
+# kenlm : depuis les sources
+# pip install https://github.com/kpu/kenlm/archive/master.zip
+#
+# Pour compiler les binaires lmplz/build_binary (entraînement des n-grams) :
+# apt-get install build-essential cmake libboost-all-dev libeigen3-dev
+# git clone https://github.com/kpu/kenlm && cd kenlm && mkdir build && cd build && cmake .. && make -j4
