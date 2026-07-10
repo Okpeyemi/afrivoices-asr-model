@@ -15,7 +15,8 @@ kalenjin, maasai).
 | v2 + KenLM v1 | 0.469 |
 | v3 + KenLM v1 (α 0.7) | 0.455 |
 | v5-t3 + KenLM v2 (α 0.5) | 0.42 |
-| **v9-bicible + KenLM v2 (α 0.7, β 0.5)** | **0.41477** |
+| v9-bicible + KenLM v2 (α 0.7, β 0.5) | 0.41477 |
+| **v9-2 (tranche 4, ciblage kln) + KenLM v2** | **0.40283** |
 
 Le score officiel est une **moyenne non pondérée du WER sur les 6 langues** (chaque
 langue compte pour 1/6). WER par langue (dev officiel, avec KenLM v2) : swa ~0.10 ·
@@ -31,7 +32,7 @@ et de la difficulté acoustique intrinsèque des langues nilotiques (kln/mas).
    vocabulaire de 67 caractères **partagé** entre les 6 langues. Entraînement progressif
    par **tranches** (le dataset complet ~750 Go dépasse le disque local, parcouru en
    tranches de ~60-80k clips, 1 époque chacune) : v4 → v5-t3 → v6 → v7-soup (fusion de
-   poids) → v8-cible (ciblage langues faibles) → **v9-bicible** (ciblage kln+mas).
+   poids) → v8-cible (ciblage langues faibles) → v9-bicible (kln+mas) → **v9-2** (tranche 4, ciblage kln).
 2. **Modèles de langue KenLM v2** : un 5-gram par langue (pyctcdecode), transcriptions
    ×3 + texte externe (Wikipedia sw/so/ki). Hyperparamètres : **α 0.7, β 0.5**.
 
@@ -49,12 +50,23 @@ et de la difficulté acoustique intrinsèque des langues nilotiques (kln/mas).
 ```
 ├── README.md / MODEL_CARD.md / HARDWARE_VALIDATION.md / LICENSE / requirements.txt
 ├── CHECKLIST_KAGGLE.md
-├── notebooks/          # entraînement (v4→v9), KenLM, décodage, soumission, audit
+├── GUIDE_REPRODUCTION.md   # ← point d'entrée pour les auditeurs
+├── RAPPORT_afrivoices.md   # démarche complète (choix, mesures, impasses)
+├── notebooks/
+│   ├── 1_entrainement/         # chaîne v2 → v9-2 (ordre numéroté dans le guide)
+│   ├── 2_modeles_de_langue/    # construction KenLM v2 (v3 exploratoire)
+│   ├── 3_inference_soumission/ # ← afrivoices_soumission.ipynb = LE notebook de vérification
+│   └── 4_analyses/             # audits, grilles, diagnostics du rapport
 ├── lm/                 # KenLM v2 (ou lien dataset Kaggle)
 └── checkpoints/        # poids v9-bicible (ou lien dataset Kaggle)
 ```
 
 ## Reproduire
+
+**→ Voir `GUIDE_REPRODUCTION.md`** : chemin rapide « vérifier la soumission » (~45 min,
+1 seul notebook) et chemin complet « réentraîner de zéro » (ordre des notebooks, accès
+aux données gated, artefacts).
+
 
 1. Environnement : `requirements.txt` (⚠️ Colab : installer kenlm+pyctcdecode PUIS
    redémarrer le runtime ; ne jamais forcer torch ni numpy<2).
@@ -62,7 +74,7 @@ et de la difficulté acoustique intrinsèque des langues nilotiques (kln/mas).
    v6-anvke → v8-drive → v9-bicible), `TRANCHE` = seul réglage entre sessions.
 3. KenLM v2 : `afrivoices_kenlm_v2.ipynb` (session CPU).
 4. Inférence + soumission : `afrivoices_soumission.ipynb`
-   (MODEL_NAME=baobab-asr-v9-bicible, LM_SUBDIR=lm_v2, α 0.7, β 0.5).
+   (MODEL_NAME=baobab-asr-v9-2, LM_SUBDIR=lm_v2, α 0.7, β 0.5).
 
 ## Données et licences
 

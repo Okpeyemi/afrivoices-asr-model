@@ -1,4 +1,4 @@
-# Model Card — AfriVoices East Africa ASR (v9-bicible + KenLM v2)
+# Model Card — AfriVoices East Africa ASR (v9-2 + KenLM v2)
 
 ## Description
 
@@ -19,7 +19,8 @@ rescoring KenLM 5-gram par langue enrichi de texte externe.
 | v6 (t0→t1) | tranches sur données officielles Anv-ke (dev officiel comme éval) |
 | v7-soup | fusion de poids v5-t3 + v6-t1 (model soup, λ=0.3) |
 | v8-cible | tranche ciblée langues faibles (kln/mas/som ~70% du mix) |
-| **v9-bicible** | tranche bi-ciblée kln+mas (64% du mix), départ v8-cible |
+| v9-bicible | tranche bi-ciblée kln+mas (64% du mix), départ v8-cible |
+| **v9-2** | tranche 4 supplémentaire, ciblage kln renforcé, départ v9-bicible |
 
 KenLM v2 : transcriptions ×3 + Wikipedia (sw 607k / so 91k / ki 11k phrases), filtrage
 par l'alphabet exact (67 caractères), lmplz -o 5 --prune 0 0 1. α 0.7 / β 0.5.
@@ -28,7 +29,7 @@ par l'alphabet exact (67 caractères), lmplz -o 5 --prune 0 0 1. α 0.7 / β 0.5
 
 | Mesure | Valeur |
 |---|---|
-| Leaderboard public (WER macro) | **0.41477** |
+| Leaderboard public (WER macro) | **0.40283** |
 | CER (caractères) | ≈ 0.094 |
 | Macro dev + KenLM v2 | ≈ 0.31 |
 
