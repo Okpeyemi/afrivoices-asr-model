@@ -16,34 +16,46 @@ kalenjin, maasai).
 | v3 + KenLM v1 (α 0.7) | 0.455 |
 | v5-t3 + KenLM v2 (α 0.5) | 0.42 |
 | v9-bicible + KenLM v2 (α 0.7, β 0.5) | 0.41477 |
-| **v9-2 (tranche 4, ciblage kln) + KenLM v2** | **0.40283** |
+| v9-2 (tranche 4, ciblage kln) + KenLM v2 (α 0.7, β 0.5) | 0.40283 |
+| v9-2 + troncature anti-padding, décodage direct (« contrôle par type ») | 0.39923 |
+| v9-2 **sans** modèle de langue (glouton, décomposition) | ≈ 0.45 |
+| **v9-2 + KenLM v2, α 0.5, β 0.0 — FINALE** | **0.39477** |
 
-Le score officiel est une **moyenne non pondérée du WER sur les 6 langues** (chaque
-langue compte pour 1/6). WER par langue (dev officiel, avec KenLM v2) : swa ~0.10 ·
-luo 0.24 · kik 0.31 · som 0.27 · mas 0.46 · kln 0.48.
+Le score officiel est une **moyenne non pondérée du WER sur les 6 langues**.
+Décomposition du score final : acoustique seule ≈ 0.45 ; contribution du modèle de
+langue ≈ −0.055 ; corrections de décodage (campagne post-0.40283) ≈ −0.008.
 
-**CER (taux d'erreur caractère) ≈ 0.094** : le modèle reconnaît correctement ~91 % des
-caractères. Le WER-mot résiduel provient surtout de désaccords de segmentation de mots
-et de la difficulté acoustique intrinsèque des langues nilotiques (kln/mas).
+Le test fournit une colonne `type` par clip (scripted / unscripted) : la part de parole
+**spontanée** va de 18.6 % (kik) à 42.2 % (mas), et le swahili est 100 % spontané. Le
+WER stratifié par (langue × type) et la calibration dev↔leaderboard sont dans
+`RAPPORT_afrivoices.md` (Partie II, §2).
 
 ## Architecture (deux étages indépendants)
 
 1. **Modèle acoustique** : `facebook/w2v-bert-2.0` (MIT, 606M params) + tête CTC,
    vocabulaire de 67 caractères **partagé** entre les 6 langues. Entraînement progressif
-   par **tranches** (le dataset complet ~750 Go dépasse le disque local, parcouru en
-   tranches de ~60-80k clips, 1 époque chacune) : v4 → v5-t3 → v6 → v7-soup (fusion de
-   poids) → v8-cible (ciblage langues faibles) → v9-bicible (kln+mas) → **v9-2** (tranche 4, ciblage kln).
-2. **Modèles de langue KenLM v2** : un 5-gram par langue (pyctcdecode), transcriptions
-   ×3 + texte externe (Wikipedia sw/so/ki). Hyperparamètres : **α 0.7, β 0.5**.
+   par **tranches** (dataset ~750 Go > disque local) : v4 → v5-t3 → v6 → v7-soup →
+   v8-cible → v9-bicible → **v9-2**. L'acoustique est gelée à v9-2 ; la campagne finale
+   (Partie II du rapport) n'a modifié que la mesure et le décodage.
+2. **Modèles de langue KenLM v2** : un 5-gram par langue (pyctcdecode), corpus =
+   transcriptions d'entraînement ×3 + texte externe (Wikipedia sw/so/ki, MasakhaNEWS
+   luo), recette `lmplz -o 5 --discount_fallback --prune 0 0 1`. Hyperparamètres
+   finaux : **α 0.5, β 0.0** (α 0.7 / β 0.5 jusqu'au contrôle ; justification mesurée
+   en Partie II §4 — sur un test à dominante spontanée, réduire le poids d'un LM nourri
+   de texte écrit/lu rend l'arbitrage à l'acoustique).
 
 ## Conformité edge
 
 | Critère | Limite | Mesuré | Statut |
 |---|---|---|---|
 | Paramètres | ≤ 1 Md | 0.606 Md | ✓ |
-| RAM (modèle + 1 KenLM, pire cas swa) | ≤ 8 Go | ≈ 1.13 Go | ✓ |
-| RTF (CPU 4 threads, pipeline complet) | ≤ 2× | 0.28 moy / 0.74 max | ✓ |
+| RAM (RSS pic : modèle fp32 + pire KenLM) | ≤ 8 Go | pic 6,71 Go en direct ≤ 60 s ; 1,80 Go via repli fenêtré au-delà (voir validation/) | ✓ |
+| RTF (CPU 4 threads, pipeline complet) | ≤ 2× | 0.28 moy / 0.74 max — re-mesuré config finale dans `validation/` | ✓ |
 | Hors-ligne, CPU uniquement | requis | oui | ✓ |
+
+Note d'intégrité de la soumission : 7 clips du test (sur 41 733) ont des bytes audio
+illisibles par tout lecteur (soundfile, librosa, repli fichier) ; ils sont transcrits
+« _ » par conception (impact ≤ 0.0002 de macro). Ids listés en Partie II §5.
 
 ## Structure
 
@@ -51,30 +63,41 @@ et de la difficulté acoustique intrinsèque des langues nilotiques (kln/mas).
 ├── README.md / MODEL_CARD.md / HARDWARE_VALIDATION.md / LICENSE / requirements.txt
 ├── CHECKLIST_KAGGLE.md
 ├── GUIDE_REPRODUCTION.md   # ← point d'entrée pour les auditeurs
-├── RAPPORT_afrivoices.md   # démarche complète (choix, mesures, impasses)
+├── RAPPORT_afrivoices.md   # démarche complète (Partie I : chaîne v2→v9-2 ;
+│                           #   Partie II : campagne de mesure post-0.40283)
 ├── notebooks/
-│   ├── 1_entrainement/         # chaîne v2 → v9-2 (ordre numéroté dans le guide)
-│   ├── 2_modeles_de_langue/    # construction KenLM v2 (v3 exploratoire)
-│   ├── 3_inference_soumission/ # ← afrivoices_soumission.ipynb = LE notebook de vérification
-│   └── 4_analyses/             # audits, grilles, diagnostics du rapport
-├── lm/                 # KenLM v2 (ou lien dataset Kaggle)
-└── checkpoints/        # poids v9-bicible (ou lien dataset Kaggle)
+│   ├── 1_entrainement/          # chaîne v2 → v9-2
+│   ├── 2_modeles_de_langue/     # construction KenLM v2 (v3 exploratoire)
+│   ├── 3_inference_soumission/
+│   │   ├── afrivoices_soumission_par_type.ipynb  # ← GÉNÉRATEUR FINAL (0.39477)
+│   │   ├── afrivoices_soumission_greedy.ipynb    # décomposition sans LM (≈0.45)
+│   │   └── afrivoices_soumission.ipynb           # générateur historique (0.40283)
+│   ├── 4_analyses/
+│   │   ├── afrivoices_p0b_dev_stratifie.ipynb    # banc stratifié (langue × type)
+│   │   └── ...                                    # audits, grilles, diagnostics
+│   └── 5_explorations/          # leviers mesurés puis écartés (README dedans)
+├── validation/          # 1 rapport de validation matérielle PAR soumission (règlement)
+├── lm/                  # KenLM v2 — binaires publiés (lien HF/Kaggle dans lm/README)
+└── checkpoints/         # poids v9-2 — publiés (lien HF/Kaggle dans checkpoints/README)
 ```
 
 ## Reproduire
 
-**→ Voir `GUIDE_REPRODUCTION.md`** : chemin rapide « vérifier la soumission » (~45 min,
-1 seul notebook) et chemin complet « réentraîner de zéro » (ordre des notebooks, accès
-aux données gated, artefacts).
+**→ Voir `GUIDE_REPRODUCTION.md`.** Chemin rapide « vérifier la soumission finale » :
 
-
-1. Environnement : `requirements.txt` (⚠️ Colab : installer kenlm+pyctcdecode PUIS
-   redémarrer le runtime ; ne jamais forcer torch ni numpy<2).
-2. Entraînement : notebooks de réentraînement dans l'ordre (v4-propre → v5-tranches →
-   v6-anvke → v8-drive → v9-bicible), `TRANCHE` = seul réglage entre sessions.
+1. Environnement : `requirements.txt`. ⚠️ Colab récent : installer
+   `pip install --no-deps pyctcdecode pygtrie` (pyctcdecode épingle numpy<2 ; l'installer
+   avec ses dépendances rétrograde numpy et casse l'image — erreur
+   `numpy.dtype size changed`), puis kenlm, puis **redémarrer le runtime**.
+2. Entraînement (optionnel, chemin complet) : notebooks 1_entrainement dans l'ordre,
+   `TRANCHE` = seul réglage entre sessions.
 3. KenLM v2 : `afrivoices_kenlm_v2.ipynb` (session CPU).
-4. Inférence + soumission : `afrivoices_soumission.ipynb`
-   (MODEL_NAME=baobab-asr-v9-2, LM_SUBDIR=lm_v2, α 0.7, β 0.5).
+4. **Soumission finale** : `afrivoices_soumission_par_type.ipynb` — config par défaut
+   = finale (v9-2, lm_v2, α 0.5, β 0.0, troncature anti-padding, décodage direct,
+   reprise auto). Remettre (0.7, 0.5) reproduit la soumission de contrôle (0.39923).
+5. **Validation matérielle** (exigée pour chaque soumission) :
+   `afrivoices_validation_materielle.ipynb` (session CPU) → rapport daté dans
+   `validation/` (RAM, RTF stratifié, latence projetée sur les 41 733 clips).
 
 ## Données et licences
 
@@ -83,11 +106,12 @@ aux données gated, artefacts).
 | DigitalUmuganda/Afrivoice_Swahili | train swa | CC-BY-4.0 |
 | Anv-ke/* (train officiel, 5 langues) | train | CC-BY-4.0 |
 | Wikipedia sw/so/ki | corpus KenLM v2 | CC-BY-SA |
+| masakhane/masakhanews (luo) | corpus KenLM v2 | voir fiche HF |
 | facebook/w2v-bert-2.0 (modèle de base) | pré-entraîné | MIT |
 
 Aucune transcription manuelle du test. Filet anti-fuite vérifié (0 chevauchement des
-`filename` de train/dev avec les 41 733 ids du test). Aucun composant sous licence
-non-commerciale.
+`filename` de train/dev avec les 41 733 ids du test ; locuteurs train/dev disjoints,
+vérifié par `recorder_uuid`). Aucun composant sous licence non-commerciale.
 
 ## Licence
 

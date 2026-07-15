@@ -5,10 +5,13 @@ Ce guide s'adresse aux organisateurs/auditeurs. Deux chemins selon l'objectif :
 
 ---
 
-## Chemin A — Vérifier la soumission (recommandé, ~45 min sur GPU)
+## Chemin A — Vérifier la soumission finale (recommandé, ~45 min sur GPU)
 
-Le fichier soumis (`submission_v9_2.csv`, leaderboard **0.40283**) se régénère avec UN
-seul notebook : **`notebooks/3_inference_soumission/afrivoices_soumission.ipynb`**.
+Le fichier soumis (`submission_v9_2_polB.csv`, leaderboard **0.39477**) se régénère avec
+UN seul notebook : **`notebooks/3_inference_soumission/afrivoices_soumission_par_type.ipynb`**
+(le « générateur final » : routage par (langue × type), troncature anti-padding, décodage
+direct pleine longueur, reprise automatique). La démarche qui mène de 0.40283 à 0.39477
+est documentée dans `RAPPORT_afrivoices.md`, **Partie II**.
 
 ### Prérequis
 1. **Les poids du modèle et les modèles de langue** (fournis à part — voir section
@@ -24,16 +27,25 @@ seul notebook : **`notebooks/3_inference_soumission/afrivoices_soumission.ipynb`
 ### Étapes
 1. Placer `baobab-asr-v9-2/` et `lm_v2/` dans un dossier de base (par défaut le notebook
    attend `Drive/afrivoices/` sur Colab ; ajuster la variable `BASE` en §2 sinon).
-2. Ouvrir `afrivoices_soumission.ipynb`. Config §2 (déjà préréglée) :
-   `MODEL_NAME="baobab-asr-v9-2"`, `LM_SUBDIR="lm_v2"`, `ALPHA=0.7`, `BETA=0.5`.
-3. Exécuter §1 (installe kenlm/pyctcdecode, **redémarrer le runtime**, relancer §1),
-   puis §2 → §6 dans l'ordre.
-4. Sortie : `submission_v9_2.csv` — 41 733 lignes, colonnes `id,language,transcription`
-   (des asserts de conformité sont intégrés en §6).
+2. Ouvrir `afrivoices_soumission_par_type.ipynb`. Config §2 (déjà préréglée sur la
+   soumission finale) : `MODEL_NAME="baobab-asr-v9-2"`, `LM_SUBDIR="lm_v2"`, et la table
+   `AB` = **(α, β) = (0.5, 0.0)** pour les six langues et les deux types. Pour reproduire
+   la soumission de contrôle (**0.39923**), remettre toute la table `AB` à (0.7, 0.5).
+3. Exécuter §1 (installe kenlm/pyctcdecode — sur image Colab récente, faire
+   `pip install --no-deps pyctcdecode pygtrie` puis kenlm, sinon numpy est rétrogradé et
+   l'image casse —, **redémarrer le runtime**, relancer §1), puis §2 → §6 dans l'ordre.
+4. Sortie : `submission_v9_2_polB.csv` — 41 733 lignes, colonnes `id,language,transcription`
+   (asserts de conformité intégrés en §6 ; reprise automatique via le fichier `_partiel`).
+
+> Décomposition (facultatif) : `afrivoices_soumission_greedy.ipynb` régénère la
+> transcription **sans modèle de langue** (≈0.45), pour isoler la contribution du KenLM.
 
 ### Validation edge
 `HARDWARE_VALIDATION.md` détaille la méthodologie. Mesures : 0.606 Md paramètres,
 RAM ≈ 1.13 Go (modèle + plus gros KenLM), RTF CPU 4 threads 0.28 moy / 0.74 max.
+Le règlement exige une validation matérielle **par soumission** : la relancer sur la
+config finale avec `notebooks/4_analyses/afrivoices_validation_materielle.ipynb`
+(session CPU) — RSS pic, RTF stratifié et latence projetée sur les 41 733 clips.
 
 ---
 
@@ -65,7 +77,12 @@ indépendant de l'entraînement — peut se faire en parallèle).
 
 ### Analyses (facultatif — reproduisent les diagnostics du rapport)
 `4_analyses/` : audit d'erreurs par catégorie, grille beta, tests de normalisation,
-mesure de la distribution des durées. Voir `RAPPORT_afrivoices.md` pour leur rôle.
+mesure de la distribution des durées, **banc dev stratifié (langue × type)**
+(`afrivoices_p0b_dev_stratifie.ipynb`) et **validation matérielle**
+(`afrivoices_validation_materielle.ipynb`). Voir `RAPPORT_afrivoices.md` — Partie I pour
+les diagnostics historiques, Partie II pour le banc stratifié et la campagne finale.
+`5_explorations/` regroupe les leviers mesurés puis écartés (fenêtrage, hybride, v10
+spontané) — voir le `README.md` qu'il contient.
 
 ---
 
