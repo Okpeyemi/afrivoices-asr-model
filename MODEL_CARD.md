@@ -56,5 +56,8 @@ audio. Non destiné aux usages critiques (médical, juridique).
 
 ## Empreinte
 
-Modèle 0.31 Go (fp32) + KenLM swa v2 0.82 Go ≈ **1.13 Go** RAM. RTF CPU 4 threads :
-0.28 moyen / 0.74 max. Voir HARDWARE_VALIDATION.md.
+Plancher **1.46 Go** RAM (modèle fp32 + pire KenLM mmappé). Le transitoire d'attention
+du conformer croît en T² : pic 6.71 Go en décodage direct ≤ 60 s ; au-delà, le générateur
+bascule sur le repli fenêtré (pic 1.80 Go). RTF CPU 4 threads : 0.75 agrégé / 1.48 max
+(direct), 0.69 en repli. Rapports datés par soumission dans `validation/` ; méthodologie
+dans HARDWARE_VALIDATION.md.

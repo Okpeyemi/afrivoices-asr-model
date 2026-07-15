@@ -236,10 +236,13 @@ edge constantes.
 | Critère | Limite | Mesuré | Statut |
 |---|---|---|---|
 | Paramètres | ≤ 1 Md | 0,606 Md | ✓ |
-| RAM (modèle + KenLM swahili) | ≤ 8 Go | ≈ 1,13 Go | ✓ |
-| RTF (CPU 4 threads) | ≤ 2× | 0,28 moy / 0,74 max | ✓ |
+| RAM (plancher : modèle + pire KenLM) | ≤ 8 Go | 1,46 Go (pic 6,71 direct ≤ 60 s ; 1,80 en repli) | ✓ |
+| RTF (CPU 4 threads) | ≤ 2× | 0,75 agrégé / 1,48 max (direct) ; 0,69 en repli | ✓ |
 | Hors-ligne, CPU | requis | oui | ✓ |
 | Licence | OSI, commercial OK | Apache-2.0 | ✓ |
+
+> Mesure affinée par régime (décodage direct vs repli fenêtré) en Partie II §5 et dans
+> les rapports datés de `validation/` ; les valeurs ci-dessus en reprennent la synthèse.
 
 Toute la pile a été vérifiée sans restriction commerciale (modèle de base MIT, données
 CC-BY, code Apache-2.0). Filet anti-fuite validé : 0 chevauchement entre les identifiants
@@ -389,11 +392,13 @@ juge.
 
 ## 5. Conformité, reproductibilité, hygiène
 
-- **Edge** : modèle 606 M (fp32 ~2,4 Go) + KenLM mmappé (max 0,82 Go) ≪ 8 Go ; RTF
-  par clip inchangé (le parallélisme du générateur accélère la production du CSV,
-  pas le coût unitaire). Conformément au règlement, un rapport de validation matérielle
-  daté est généré par `afrivoices_validation_materielle.ipynb` (seuil de repli ~60 s →
-  RSS pic 1,80 Go et RTF 0,688 ; latence projetée 333 h sur les 467 h d'audio du test).
+- **Edge** : validation matérielle mesurée — rapports datés dans `validation/`, un par
+  soumission sélectionnée, générés par `afrivoices_validation_materielle.ipynb`.
+  Plancher **1,46 Go** (modèle fp32 + pire KenLM mmappé). Le transitoire d'attention
+  croît en T² : pic **6,71 Go** en décodage direct à 60 s ; au-delà de ~60 s, le
+  générateur bascule sur le **repli fenêtré** (pic **1,80 Go**, RTF 0,688 —
+  `SEUIL_DIRECT_S` dans le générateur). RTF agrégé 0,75 sur les clips ≤ 60 s.
+  Latence projetée ≈ **333 h** pour les 467 h d'audio du test (CPU 4 threads).
 - **KenLM v2 documenté** : recette `lmplz -o 5 --discount_fallback --prune 0 0 1`,
   corpus = transcriptions train ×3 + Wikipedia sw/so/ki + MasakhaNEWS luo ;
   listes d'unigrams : top-50k par langue.

@@ -41,11 +41,12 @@ est documentée dans `RAPPORT_afrivoices.md`, **Partie II**.
 > transcription **sans modèle de langue** (≈0.45), pour isoler la contribution du KenLM.
 
 ### Validation edge
-`HARDWARE_VALIDATION.md` détaille la méthodologie. Mesures : 0.606 Md paramètres,
-RAM ≈ 1.13 Go (modèle + plus gros KenLM), RTF CPU 4 threads 0.28 moy / 0.74 max.
-Le règlement exige une validation matérielle **par soumission** : la relancer sur la
-config finale avec `notebooks/4_analyses/afrivoices_validation_materielle.ipynb`
-(session CPU) — RSS pic, RTF stratifié et latence projetée sur les 41 733 clips.
+Les rapports de validation matérielle datés sont dans `validation/` (un par soumission,
+générés par `notebooks/4_analyses/afrivoices_validation_materielle.ipynb`, session CPU) ;
+`HARDWARE_VALIDATION.md` en détaille la méthodologie. Mesures (config finale) :
+0.606 Md paramètres ; RAM plancher 1.46 Go, pic 6.71 Go en décodage direct ≤ 60 s puis
+repli fenêtré à 1.80 Go au-delà ; RTF CPU 4 threads 0.75 agrégé / 1.48 max (direct),
+0.69 en repli ; latence projetée ≈ 333 h sur les 467 h d'audio du test.
 
 ---
 

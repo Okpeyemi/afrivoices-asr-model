@@ -50,7 +50,7 @@ WER stratifié par (langue × type) et la calibration dev↔leaderboard sont dan
 |---|---|---|---|
 | Paramètres | ≤ 1 Md | 0.606 Md | ✓ |
 | RAM (RSS pic : modèle fp32 + pire KenLM) | ≤ 8 Go | pic 6,71 Go en direct ≤ 60 s ; 1,80 Go via repli fenêtré au-delà (voir validation/) | ✓ |
-| RTF (CPU 4 threads, pipeline complet) | ≤ 2× | 0.28 moy / 0.74 max — re-mesuré config finale dans `validation/` | ✓ |
+| RTF (CPU 4 threads, pipeline complet) | ≤ 2× | 0.75 agrégé / 1.48 max (direct ≤ 60 s) ; 0.69 via repli fenêtré — détail dans `validation/` | ✓ |
 | Hors-ligne, CPU uniquement | requis | oui | ✓ |
 
 Note d'intégrité de la soumission : 7 clips du test (sur 41 733) ont des bytes audio
@@ -77,8 +77,8 @@ illisibles par tout lecteur (soundfile, librosa, repli fichier) ; ils sont trans
 │   │   └── ...                                    # audits, grilles, diagnostics
 │   └── 5_explorations/          # leviers mesurés puis écartés (README dedans)
 ├── validation/          # 1 rapport de validation matérielle PAR soumission (règlement)
-├── lm/                  # KenLM v2 — binaires publiés (lien HF/Kaggle dans lm/README)
-└── checkpoints/         # poids v9-2 — publiés (lien HF/Kaggle dans checkpoints/README)
+├── lm_v2/               # KenLM v2 : 6 binaires + listes d'unigrams exactes (50k/langue)
+└── (racine du dépôt HF) # poids v9-2 : from_pretrained("Okpeyemi/afrivoices-asr-baobab")
 ```
 
 ## Reproduire
