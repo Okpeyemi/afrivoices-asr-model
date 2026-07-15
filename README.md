@@ -1,3 +1,5 @@
+> **→ Dépôt canonique (code + poids + LM + validation) : https://huggingface.co/Okpeyemi/afrivoices-asr-baobab**
+
 # AfriVoices East Africa — ASR multilingue edge (6 langues)
 
 Système de reconnaissance vocale automatique (ASR) **unique** couvrant six langues
