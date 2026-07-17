@@ -22,14 +22,17 @@ rescoring KenLM 5-gram par langue enrichi de texte externe.
 | v9-bicible | tranche bi-ciblée kln+mas (64% du mix), départ v8-cible |
 | **v9-2** | tranche 4 supplémentaire, ciblage kln renforcé, départ v9-bicible |
 
-KenLM v2 : transcriptions ×3 + Wikipedia (sw 607k / so 91k / ki 11k phrases), filtrage
-par l'alphabet exact (67 caractères), lmplz -o 5 --prune 0 0 1. α 0.7 / β 0.5.
+KenLM v2 : transcriptions ×3 + Wikipedia (sw 607k / so 91k / ki 11k phrases) + MasakhaNEWS
+(luo), filtrage par l'alphabet exact (67 caractères), lmplz -o 5 --discount_fallback
+--prune 0 0 1. Décodage final : **α 0.5 / β 0.0** (α 0.7 / β 0.5 jusqu'au contrôle ;
+justification dans RAPPORT Partie II §4).
 
 ## Performance
 
 | Mesure | Valeur |
 |---|---|
-| Leaderboard public (WER macro) | **0.40283** |
+| Leaderboard public (WER macro) — finale | **0.39477** |
+| Leaderboard v9-2 + KenLM v2 (α 0.7, β 0.5) | 0.40283 |
 | CER (caractères) | ≈ 0.094 |
 | Macro dev + KenLM v2 | ≈ 0.31 |
 

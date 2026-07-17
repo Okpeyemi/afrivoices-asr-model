@@ -1,0 +1,2 @@
+# gstack browse runtime (tokens, logs, session state) — never commit
+.gstack/
