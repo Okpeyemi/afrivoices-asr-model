@@ -1,3 +1,34 @@
+---
+license: apache-2.0
+language:
+  - sw    # Swahili
+  - so    # Somali
+  - ki    # Kikuyu
+  - luo   # Dholuo / Luo
+  - kln   # Kalenjin
+  - mas   # Maasai
+pipeline_tag: automatic-speech-recognition
+library_name: transformers
+tags:
+  - automatic-speech-recognition
+  - speech
+  - audio
+  - ctc
+  - wav2vec2-bert
+  - w2v-bert-2.0
+  - conformer
+  - kenlm
+  - pyctcdecode
+  - multilingual
+  - low-resource
+  - african-languages
+  - east-african-languages
+  - edge
+  - on-device
+  - cpu
+  - offline
+---
+
 # Model Card — AfriVoices East Africa ASR (v9-2 + KenLM v2)
 
 ## Description
